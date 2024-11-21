@@ -10,7 +10,6 @@ BLOCKED_USERS_FILE = "blocked_users.json"
 COORDINATES_FILE = "coordinates.json"
 API_TOKEN = ''
 
-# https://github.com/Inssurg3nt/geo_bot
 
 EXPECTED_LATITUDE = 00.000000 
 EXPECTED_LONGITUDE = 00.000000
