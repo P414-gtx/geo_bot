@@ -6,8 +6,6 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, FSInputFile
 import json
 import os
 
-# https://t.me/vka_geo_bot
-
 BLOCKED_USERS_FILE = "blocked_users.json"
 COORDINATES_FILE = "coordinates.json"
 API_TOKEN = ''
