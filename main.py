@@ -6,10 +6,11 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, FSInputFile
 import json
 import os
 
+# https://t.me/vka_geo_bot
+
 BLOCKED_USERS_FILE = "blocked_users.json"
 COORDINATES_FILE = "coordinates.json"
 API_TOKEN = ''
-
 
 EXPECTED_LATITUDE = 00.000000 
 EXPECTED_LONGITUDE = 00.000000
@@ -39,13 +40,15 @@ async def send_welcome(message: types.Message):
     keyboard = get_welcome_keyboard()
     
     await message.reply("Мне нужна информация о местоположении одной из военных баз, но я не помню даже ее названия(\n"
-                        "Хотя, есть некоторые факты, которые я все же запомнил (см. описание).\n", reply_markup=keyboard)
+                        "Хотя, есть некоторые факты, которые я все же запомнил (см. описание).\n"
+                        "У вас всего 3 попытки! Вводите координаты правильно, ищите внимательнее.\n", reply_markup=keyboard)
 
 @dp.message(lambda message: message.text == "ОПИСАНИЕ")
 async def send_description(message: types.Message):
     await bot.send_message(
         message.from_user.id,
-        "Эта база имеет площадь почти 4 кв.км., является одной из крупнейших в Европе, а построили ее после каких-то известных трагических событий.... "
+        "Эта база имеет площадь почти 4 кв.км., является одной из крупнейших в Европе, а построили ее после каких-то известных трагических событий... \n"
+        "p.s.  Помни, что не все страны международно признаны)"
     )
 
     photo = FSInputFile("photo.jpg")
@@ -82,8 +85,8 @@ async def start_checking(message: types.Message):
     if user_id not in attempt_counts:
         attempt_counts[user_id] = 0
     
-    if attempt_counts[user_id] < 5:
-        await message.reply("Пожалуйста, отправьте свои координаты и страну в формате: широта, долгота, страна. Например: 40.7128,-74.0060, США")
+    if attempt_counts[user_id] < 3:
+        await message.reply("Пожалуйста, отправьте свои координаты и страну в формате: широта, долгота, страна. Например: 40.712831,-74.006012, США")
     else:
         blocked_users.add(user_id)
         save_blocked_users()
@@ -107,8 +110,8 @@ async def check_coordinates(message: types.Message):
         country = country.strip()
 
         if country in coordinates_data:
-            expected_lat, expected_lon = coordinates_data[country]
-            if lat == expected_lat and lon == expected_lon:
+            if lat == EXPECTED_LATITUDE and lon == EXPECTED_LONGITUDE:
+                print(lat, lon, EXPECTED_LATITUDE, EXPECTED_LONGITUDE)
                 await message.reply(f"Координаты успешно получены! Флаг: {FLAG}")
                 return
         await message.reply(f"Неверные координаты или страна. Попробуйте еще раз.")
@@ -117,12 +120,12 @@ async def check_coordinates(message: types.Message):
         pass
 
     attempt_counts[user_id] += 1
-    if attempt_counts[user_id] >= 5:
+    if attempt_counts[user_id] >= 3:
         blocked_users.add(user_id)
         save_blocked_users()
         await message.reply("Вы исчерпали все попытки. Вы заблокированы.")
     else:
-        attempts_left = 5 - attempt_counts[user_id]
+        attempts_left = 3 - attempt_counts[user_id]
         await message.reply(f"Неверные координаты. Попробуйте еще раз. Осталось попыток: {attempts_left}")
 
 if __name__ == '__main__':
